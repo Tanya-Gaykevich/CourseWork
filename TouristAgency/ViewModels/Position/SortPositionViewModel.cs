@@ -5,19 +5,14 @@ using System.Threading.Tasks;
 
 namespace TouristAgency.ViewModels.Position
 {
-    public enum SortState
-    {
-        NameAsc,
-        NameDesc
-    }
     public class SortPositionViewModel
     {
-        public SortState NameSort { get; set; }
-        public SortState Current { get; set; }
-        public SortPositionViewModel(SortState sortOrder)
+        public EntityServices.PositionService.SortState NameSort { get; set; }
+        public EntityServices.PositionService.SortState Current { get; set; }
+        public SortPositionViewModel(EntityServices.PositionService.SortState sortState)
         {
-            NameSort = sortOrder == SortState.NameAsc ? SortState.NameDesc : SortState.NameAsc;
-            Current = sortOrder;
+            NameSort = sortState == EntityServices.PositionService.SortState.NameAsc ? EntityServices.PositionService.SortState.NameDesc : EntityServices.PositionService.SortState.NameAsc;
+            Current = sortState;
         }
     }
 }

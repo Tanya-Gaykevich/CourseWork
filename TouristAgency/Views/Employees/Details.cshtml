@@ -38,11 +38,15 @@
             @Html.DisplayNameFor(model => model.Position)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Position.Id)
+            @Html.DisplayFor(model => model.Position.Name)
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+    {
+        <a asp-action="Edit"
+           asp-route-id="@Model.Id">Edit</a>
+    }
     <a asp-action="Index">Back to List</a>
 </div>

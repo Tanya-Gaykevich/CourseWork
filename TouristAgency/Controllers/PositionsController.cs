@@ -15,29 +15,58 @@ namespace TouristAgency.Controllers
     {
         private readonly TouristAgencyContext _context;
         private readonly PositionService _service;
+        private readonly int _pageSize;
 
         public PositionsController(TouristAgencyContext context)
         {
             _context = context;
             _service = new PositionService();
+            _pageSize = 5;
         }
 
         // GET: Positions
         public async Task<IActionResult> Index(string selectedName, int? page, PositionService.SortState? sortState)
         {
-            _service.GetSortPagingCookiesForUserIfNull(Request.Cookies, User.Identity.Name, 
+            if (!User.IsInRole(Areas.Identity.Roles.User) && !User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return Redirect("~/Identity/Account/Login");
+            }
+            bool isFromFilter = HttpContext.Request.Query["isFromFilter"] == "true";
+
+            _service.GetSortPagingCookiesForUserIfNull(Request.Cookies, User.Identity.Name, isFromFilter, 
                 ref page, ref sortState);
-            _service.GetFilterCookiesForUserIfNull(Request.Cookies, User.Identity.Name, bool.Parse(HttpContext.Request.Query["isFromFilter"]),
+            _service.GetFilterCookiesForUserIfNull(Request.Cookies, User.Identity.Name, isFromFilter,
                 ref selectedName);
             _service.SetDefaultValuesIfNull(ref selectedName, ref page, ref sortState);
+            _service.SetCookies(Response.Cookies, User.Identity.Name, selectedName, page, sortState);
 
+            var positions = _context.Positions.AsQueryable();
 
-            return View(await _context.Positions.ToListAsync());
+            positions = _service.Filter(positions, selectedName);
+
+            var count = await positions.CountAsync();
+
+            positions = _service.Sort(positions, (PositionService.SortState)sortState);
+            positions = _service.Paging(positions, isFromFilter, (int)page, _pageSize);
+
+            ViewModels.Position.IndexPositionViewModel model = new ViewModels.Position.IndexPositionViewModel
+            {
+                Positions = await positions.ToListAsync(),
+                PageViewModel = new ViewModels.PageViewModel(count, (int)page, _pageSize),
+                FilterPositionViewModel = new ViewModels.Position.FilterPositionViewModel(selectedName),
+                SortPositionViewModel = new ViewModels.Position.SortPositionViewModel((PositionService.SortState)sortState),
+            };
+
+            return View(model);
         }
 
         // GET: Positions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.User) && !User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return Redirect("~/Identity/Account/Login");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -66,6 +95,10 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name")] Position position)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Positions");
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(position);
@@ -78,6 +111,10 @@ namespace TouristAgency.Controllers
         // GET: Positions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Positions");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -98,6 +135,10 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Position position)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Positions");
+            }
             if (id != position.Id)
             {
                 return NotFound();
@@ -129,6 +170,10 @@ namespace TouristAgency.Controllers
         // GET: Positions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Positions");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -149,6 +194,10 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Positions");
+            }
             var position = await _context.Positions.FindAsync(id);
             _context.Positions.Remove(position);
             await _context.SaveChangesAsync();

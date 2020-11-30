@@ -1,0 +1,178 @@
+﻿@model TouristAgency.ViewModels.Voucher.IndexVoucherViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    var defaultVoucher = Model.Vouchers.Select(v => v.Voucher).FirstOrDefault();
+}
+
+<h1>Index</h1>
+
+<p>
+    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+    {
+        <a asp-action="Create">CREATE NEW</a>
+    }
+</p>
+<form method="get" class="form-inline">
+    <label>Name:</label>
+    <input name="selectedName" value="@Model.FilterVoucherViewModel.SelectedName" class="form-control col-2 m-1" />
+
+    <label>Country:</label>
+    <input name="selectedCountry" value="@Model.FilterVoucherViewModel.SelectedCountry" class="form-control col-2 m-1" />
+
+    <label>Start date:</label>
+    <input type="date" name="selectedStartDate" value="@(Model.FilterVoucherViewModel.SelectedStartDate != null ? Model.FilterVoucherViewModel.SelectedStartDate.Value.ToString("yyyy-MM-dd") : "")" class="form-control col-2 m-1" />
+
+    <label>End date:</label>
+    <input type="date" name="selectedEndDate" value="@(Model.FilterVoucherViewModel.SelectedEndDate != null ? Model.FilterVoucherViewModel.SelectedEndDate.Value.ToString("yyyy-MM-dd") : "")" class="form-control col-2 m-1" />
+
+    <label>Type of rest:</label>
+    <select name="selectedTypeOfRestId" asp-items="@Model.FilterVoucherViewModel.TypesOfRest" class="form-control col-2 m-1" ></select>
+
+    <input type="hidden" name="isFromFilter" value="true" />
+    <input type="submit" value="Filter" class="btn btn-outline-dark col-2 m-1" />
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortState="@Model.SortVoucherViewModel.NameSort"
+                   asp-route-selectedName="@Model.FilterVoucherViewModel.SelectedName"
+                   asp-route-selectedCountry="@Model.FilterVoucherViewModel.SelectedCountry"
+                   asp-route-selectedStartDate="@Model.FilterVoucherViewModel.SelectedStartDate"
+                   asp-route-selectedEndDate="@Model.FilterVoucherViewModel.SelectedEndDate"
+                   asp-route-selectedTypeOfRestId="@Model.FilterVoucherViewModel.SelectedTypeOfRestId">
+                    @Html.DisplayNameFor(model => defaultVoucher.Name)
+                </a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultVoucher.StartDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultVoucher.EndDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultVoucher.Employee)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultVoucher.Hotel)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultVoucher.TypeOfRest)
+            </th>
+            <th>
+                Country
+            </th>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortState="@Model.SortVoucherViewModel.FrequencySort"
+                   asp-route-selectedName="@Model.FilterVoucherViewModel.SelectedName"
+                   asp-route-selectedCountry="@Model.FilterVoucherViewModel.SelectedCountry"
+                   asp-route-selectedStartDate="@Model.FilterVoucherViewModel.SelectedStartDate"
+                   asp-route-selectedEndDate="@Model.FilterVoucherViewModel.SelectedEndDate"
+                   asp-route-selectedTypeOfRestId="@Model.FilterVoucherViewModel.SelectedTypeOfRestId">
+                    Order frequency
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Vouchers)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Voucher.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Voucher.StartDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Voucher.EndDate)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EmployeeName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HotelName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TypeOfRestName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.HotelCountryName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Frequency)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Voucher.Id">Details</a>
+                    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Voucher.Id">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Voucher.Id">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="d-flex align-items-center justify-content-center">
+
+    @if (Model.PageViewModel.HasPreviousPage)
+    {
+        <a asp-action="Index"
+           asp-route-page="1"
+           asp-route-sortState="@Model.SortVoucherViewModel.Current"
+           asp-route-selectedName="@Model.FilterVoucherViewModel.SelectedName"
+           asp-route-selectedCountry="@Model.FilterVoucherViewModel.SelectedCountry"
+           asp-route-selectedStartDate="@Model.FilterVoucherViewModel.SelectedStartDate"
+           asp-route-selectedEndDate="@Model.FilterVoucherViewModel.SelectedEndDate"
+           asp-route-selectedTypeOfRestId="@Model.FilterVoucherViewModel.SelectedTypeOfRestId"
+           class="btn btn-outline-dark m-1">
+            First page
+        </a>
+
+        <a asp-action="Index"
+           asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+           asp-route-sortState="@Model.SortVoucherViewModel.Current"
+           asp-route-selectedName="@Model.FilterVoucherViewModel.SelectedName"
+           asp-route-selectedCountry="@Model.FilterVoucherViewModel.SelectedCountry"
+           asp-route-selectedStartDate="@Model.FilterVoucherViewModel.SelectedStartDate"
+           asp-route-selectedEndDate="@Model.FilterVoucherViewModel.SelectedEndDate"
+           asp-route-selectedTypeOfRestId="@Model.FilterVoucherViewModel.SelectedTypeOfRestId"
+           class="btn btn-outline-dark m-1">
+            Previous page
+        </a>
+    }
+    <a class="btn btn-outline-dark m-1">
+        @Model.PageViewModel.PageNumber
+    </a>
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        <a asp-action="Index"
+           asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+           asp-route-sortState="@Model.SortVoucherViewModel.Current"
+           asp-route-selectedName="@Model.FilterVoucherViewModel.SelectedName"
+           asp-route-selectedCountry="@Model.FilterVoucherViewModel.SelectedCountry"
+           asp-route-selectedStartDate="@Model.FilterVoucherViewModel.SelectedStartDate"
+           asp-route-selectedEndDate="@Model.FilterVoucherViewModel.SelectedEndDate"
+           asp-route-selectedTypeOfRestId="@Model.FilterVoucherViewModel.SelectedTypeOfRestId"
+           class="btn btn-outline-dark m-1">
+            Next page
+        </a>
+
+        <a asp-action="Index"
+           asp-route-page="@Model.PageViewModel.TotalPages"
+           asp-route-sortState="@Model.SortVoucherViewModel.Current"
+           asp-route-selectedName="@Model.FilterVoucherViewModel.SelectedName"
+           asp-route-selectedCountry="@Model.FilterVoucherViewModel.SelectedCountry"
+           asp-route-selectedStartDate="@Model.FilterVoucherViewModel.SelectedStartDate"
+           asp-route-selectedEndDate="@Model.FilterVoucherViewModel.SelectedEndDate"
+           asp-route-selectedTypeOfRestId="@Model.FilterVoucherViewModel.SelectedTypeOfRestId"
+           class="btn btn-outline-dark m-1">
+            Last page (@Model.PageViewModel.TotalPages)
+        </a>
+    }
+</div>

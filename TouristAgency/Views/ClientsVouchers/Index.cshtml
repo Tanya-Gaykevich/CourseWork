@@ -1,0 +1,131 @@
+﻿@model TouristAgency.ViewModels.ClientVoucher.IndexClientVoucherViewModel
+
+@{
+    ViewData["Title"] = "Index";
+    var defaultClientVoucher = Model.ClientsVouchers.FirstOrDefault();
+}
+
+<h1>Index</h1>
+
+<p>
+    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+    {
+        <a asp-action="Create">CREATE NEW</a>
+    }
+</p>
+<form method="get" class="form-inline">
+    <label>Name:</label>
+    <input name="selectedClientLastName" value="@Model.FilterClientVoucherViewModel.SelectedClientLastName" class="form-control col-2 m-1" />
+
+    <label>Paid orders:</label>
+    <input name="isPaid" type="checkbox" value="true" @((bool)Model.FilterClientVoucherViewModel.IsPaid ? "checked=\"checked\"" : "") class="form-control col-1 m-1" />
+
+    <label>Reserved orders:</label>
+    <input name="isReserved" type="checkbox" value="true" @((bool)Model.FilterClientVoucherViewModel.IsReserved ? "checked=\"checked\"" : "") class="form-control col-1 m-1" />
+
+    <input type="hidden" name="isFromFilter" value="true" />
+    <input type="submit" value="Filter" class="btn btn-outline-dark col-3 m-1" />
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => defaultClientVoucher.ReservationMark)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultClientVoucher.PaymentMark)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultClientVoucher.Voucher)
+            </th>
+            <th>
+
+                <a asp-action="Index"
+                   asp-route-sortState="@Model.SortClientVoucherViewModel.ClientLastNameSort"
+                   asp-route-selectedClientLastName="@Model.FilterClientVoucherViewModel.SelectedClientLastName"
+                   asp-route-isPaid="@Model.FilterClientVoucherViewModel.IsPaid"
+                   asp-route-isReserved="@Model.FilterClientVoucherViewModel.IsReserved">
+                    @Html.DisplayNameFor(model => defaultClientVoucher.Client)
+                </a>
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.ClientsVouchers)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ReservationMark)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.PaymentMark)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Voucher.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Client.LastName)
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a>
+                    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="d-flex align-items-center justify-content-center">
+
+    @if (Model.PageViewModel.HasPreviousPage)
+    {
+        <a asp-action="Index"
+           asp-route-page="1"
+           asp-route-sortState="@Model.SortClientVoucherViewModel.Current"
+           asp-route-selectedClientLastName="@Model.FilterClientVoucherViewModel.SelectedClientLastName"
+           asp-route-isPaid="@Model.FilterClientVoucherViewModel.IsPaid"
+           asp-route-isReserved="@Model.FilterClientVoucherViewModel.IsReserved"
+           class="btn btn-outline-dark m-1">
+            First page
+        </a>
+
+        <a asp-action="Index"
+           asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+           asp-route-sortState="@Model.SortClientVoucherViewModel.Current"
+           asp-route-selectedClientLastName="@Model.FilterClientVoucherViewModel.SelectedClientLastName"
+           asp-route-isPaid="@Model.FilterClientVoucherViewModel.IsPaid"
+           asp-route-isReserved="@Model.FilterClientVoucherViewModel.IsReserved"
+           class="btn btn-outline-dark m-1">
+            Previous page
+        </a>
+    }
+    <a class="btn btn-outline-dark m-1">
+        @Model.PageViewModel.PageNumber
+    </a>
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        <a asp-action="Index"
+           asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+           asp-route-sortState="@Model.SortClientVoucherViewModel.Current"
+           asp-route-selectedClientLastName="@Model.FilterClientVoucherViewModel.SelectedClientLastName"
+           asp-route-isPaid="@Model.FilterClientVoucherViewModel.IsPaid"
+           asp-route-isReserved="@Model.FilterClientVoucherViewModel.IsReserved"
+           class="btn btn-outline-dark m-1">
+            Next page
+        </a>
+
+        <a asp-action="Index"
+           asp-route-page="@Model.PageViewModel.TotalPages"
+           asp-route-sortState="@Model.SortClientVoucherViewModel.Current"
+           asp-route-selectedClientLastName="@Model.FilterClientVoucherViewModel.SelectedClientLastName"
+           asp-route-isPaid="@Model.FilterClientVoucherViewModel.IsPaid"
+           asp-route-isReserved="@Model.FilterClientVoucherViewModel.IsReserved"
+           class="btn btn-outline-dark m-1">
+            Last page (@Model.PageViewModel.TotalPages)
+        </a>
+    }
+</div>

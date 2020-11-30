@@ -26,6 +26,7 @@ namespace TouristAgency
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddTransient<Services.CachingService>();
             services.AddDbContext<Data.TouristAgencyContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("TouristAgencyConnection")));
@@ -34,7 +35,7 @@ namespace TouristAgency
             services.AddDbContext<Data.ApplicationDbContext>(options =>
                 options.UseSqlite(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<Data.ApplicationDbContext>();
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();

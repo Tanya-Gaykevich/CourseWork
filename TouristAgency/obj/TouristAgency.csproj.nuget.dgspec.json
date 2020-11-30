@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/a0b194ee2ee9e340fc32b774b4292de4/TouristAgency/TouristAgency.csproj": {}
+    "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/TouristAgency/TouristAgency.csproj": {}
   },
   "projects": {
-    "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/a0b194ee2ee9e340fc32b774b4292de4/TouristAgency/TouristAgency.csproj": {
+    "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/TouristAgency/TouristAgency.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/a0b194ee2ee9e340fc32b774b4292de4/TouristAgency/TouristAgency.csproj",
+        "projectUniqueName": "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/TouristAgency/TouristAgency.csproj",
         "projectName": "TouristAgency",
-        "projectPath": "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/a0b194ee2ee9e340fc32b774b4292de4/TouristAgency/TouristAgency.csproj",
+        "projectPath": "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/TouristAgency/TouristAgency.csproj",
         "packagesPath": "/Users/tatyanagaykevich/.nuget/packages/",
-        "outputPath": "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/a0b194ee2ee9e340fc32b774b4292de4/TouristAgency/obj/",
+        "outputPath": "/Users/tatyanagaykevich/Documents/THIRD COURSE/CourseWork/TouristAgency/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/tatyanagaykevich/.config/NuGet/NuGet.Config"
@@ -42,11 +42,11 @@
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[3.1.7, )"
+              "version": "[3.1.10, )"
             },
             "Microsoft.AspNetCore.Identity.UI": {
               "target": "Package",
-              "version": "[3.1.7, )"
+              "version": "[3.1.10, )"
             },
             "Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation": {
               "target": "Package",

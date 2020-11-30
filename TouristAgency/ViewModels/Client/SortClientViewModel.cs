@@ -5,19 +5,14 @@ using System.Threading.Tasks;
 
 namespace TouristAgency.ViewModels.Client
 {
-    public enum SortState
-    {
-        BirthdayAsc,
-        BirthdayDesc
-    }
     public class SortClientViewModel
     {
-        public SortState BirthdaySort { get; set; }
-        public SortState Current { get; set; }
-        public SortClientViewModel(SortState sortOrder)
+        public EntityServices.ClientService.SortState LastNameSort { get; set; }
+        public EntityServices.ClientService.SortState Current { get; set; }
+        public SortClientViewModel(EntityServices.ClientService.SortState sortState)
         {
-            BirthdaySort = sortOrder == SortState.BirthdayAsc ? SortState.BirthdayDesc : SortState.BirthdayAsc;
-            Current = sortOrder;
+            LastNameSort = sortState == EntityServices.ClientService.SortState.LastNameAsc ? EntityServices.ClientService.SortState.LastNameDesc : EntityServices.ClientService.SortState.LastNameAsc;
+            Current = sortState;
         }
     }
 }

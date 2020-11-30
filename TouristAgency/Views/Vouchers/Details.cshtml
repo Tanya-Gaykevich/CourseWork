@@ -1,0 +1,107 @@
+﻿@model TouristAgency.ViewModels.Voucher.DetailsViewModel
+
+@{
+    ViewData["Title"] = "Details";
+    var defaultService = Model.Services.FirstOrDefault();
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Voucher</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Voucher.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Voucher.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Voucher.StartDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Voucher.StartDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Voucher.EndDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Voucher.EndDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Voucher.Employee)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Voucher.Employee.LastName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Voucher.Hotel)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Voucher.Hotel.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Voucher.TypeOfRest)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Voucher.TypeOfRest.Name)
+        </dd>
+    </dl>
+</div>
+<h4 class="text-center p-2">
+    <text>Services</text>
+</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => defaultService.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultService.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => defaultService.Cost)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Services)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Cost)
+                </td>
+                <td>
+                    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+                    {
+                        <a asp-action="DeleteService"
+                           asp-route-voucherId="@Model.Voucher.Id"
+                           asp-route-serviceId="@item.Id"
+                           class="btn btn-outline-dark">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-action="AddService"
+   asp-route-voucherId="@Model.Voucher.Id"
+   class="btn btn-outline-dark">Add service to voucher</a>
+<hr />
+<div>
+    @if (User.IsInRole(TouristAgency.Areas.Identity.Roles.Admin))
+    {
+        <a asp-action="Edit"
+           asp-route-id="@Model.Voucher.Id">Edit</a>
+    }
+    <a asp-action="Index">Back to List</a>
+</div>

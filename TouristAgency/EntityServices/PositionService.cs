@@ -22,9 +22,9 @@ namespace TouristAgency.EntityServices
             return positions;
         }
 
-        public IQueryable<Models.Position> Sort(IQueryable<Models.Position> positions, SortState sortOrder)
+        public IQueryable<Models.Position> Sort(IQueryable<Models.Position> positions, SortState sortState)
         {
-            switch (sortOrder)
+            switch (sortState)
             {
                 case SortState.NameAsc:
                     positions = positions.OrderBy(p => p.Name);
@@ -56,20 +56,23 @@ namespace TouristAgency.EntityServices
             }
         }
 
-        public void GetSortPagingCookiesForUserIfNull(IRequestCookieCollection cookies, string username, ref int? page, ref SortState? sortState)
+        public void GetSortPagingCookiesForUserIfNull(IRequestCookieCollection cookies, string username, bool isFromFilter, ref int? page, ref SortState? sortState)
         {
-            if(page == null)
+            if(!isFromFilter)
             {
-                if(cookies.TryGetValue(username + "positionPage", out string pageStr))
+                if (page == null)
                 {
-                    page = int.Parse(pageStr);
+                    if (cookies.TryGetValue(username + "positionPage", out string pageStr))
+                    {
+                        page = int.Parse(pageStr);
+                    }
                 }
-            }
-            if(sortState == null)
-            {
-                if(cookies.TryGetValue(username + "positionSortState", out string sortStateStr))
+                if (sortState == null)
                 {
-                    sortState = (SortState)Enum.Parse(typeof(SortState), sortStateStr);
+                    if (cookies.TryGetValue(username + "positionSortState", out string sortStateStr))
+                    {
+                        sortState = (SortState)Enum.Parse(typeof(SortState), sortStateStr);
+                    }
                 }
             }
         }

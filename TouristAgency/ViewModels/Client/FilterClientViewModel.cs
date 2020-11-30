@@ -7,13 +7,11 @@ namespace TouristAgency.ViewModels.Client
 {
     public class FilterClientViewModel
     {
-        public string SelectedSurname { get; set; }
-        public bool? SelectedGender { get; set; }
+        public string SelectedLastName { get; set; }
 
-        public FilterClientViewModel(string selectedSurname, bool? selectedGender)
+        public FilterClientViewModel(string selectedLastName)
         {
-            SelectedSurname = selectedSurname;
-            SelectedGender = selectedGender;
+            SelectedLastName = selectedLastName;
         }
     }
 }

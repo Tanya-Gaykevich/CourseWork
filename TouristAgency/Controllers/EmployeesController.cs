@@ -6,29 +6,82 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TouristAgency.Data;
+using TouristAgency.EntityServices;
 using TouristAgency.Models;
 
 namespace TouristAgency.Controllers
 {
     public class EmployeesController : Controller
     {
+        private readonly Services.CachingService _caching;
         private readonly TouristAgencyContext _context;
+        private readonly EmployeeService _service;
+        private readonly int _pageSize;
 
-        public EmployeesController(TouristAgencyContext context)
+        public EmployeesController(TouristAgencyContext context, Services.CachingService caching)
         {
+            _caching = caching;
             _context = context;
+            _service = new EmployeeService();
+            _pageSize = 5;
         }
 
-        // GET: Employees
-        public async Task<IActionResult> Index()
+        // GET: Clients
+        public async Task<IActionResult> Index(string selectedLastName, int? page, EmployeeService.SortState? sortState,
+            int? selectedAge, int? selectedPositionId)
         {
-            var touristAgencyContext = _context.Employees.Include(e => e.Position);
-            return View(await touristAgencyContext.ToListAsync());
+            if (!User.IsInRole(Areas.Identity.Roles.User) && !User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return Redirect("~/Identity/Account/Login");
+            }
+            if (_caching.TryGetValue($"employees-{selectedLastName}-{page}-{sortState}-{selectedAge}-{selectedPositionId}",
+                out ViewModels.Employee.IndexEmployeeViewModel cachedModel))
+            {
+                return View(cachedModel);
+            }
+            else
+            {
+                bool isFromFilter = HttpContext.Request.Query["isFromFilter"] == "true";
+
+                _service.GetSortPagingCookiesForUserIfNull(Request.Cookies, User.Identity.Name, isFromFilter,
+                    ref page, ref sortState);
+                _service.GetFilterCookiesForUserIfNull(Request.Cookies, User.Identity.Name, isFromFilter,
+                    ref selectedLastName, ref selectedAge, ref selectedPositionId);
+                _service.SetDefaultValuesIfNull(ref selectedLastName, ref page, ref sortState, ref selectedAge, ref selectedPositionId);
+                _service.SetCookies(Response.Cookies, User.Identity.Name, selectedLastName, page, sortState, selectedAge, selectedPositionId);
+
+                var employees = _context.Employees.Include(e => e.Position).AsQueryable();
+
+                employees = _service.Filter(employees, selectedLastName, selectedAge, selectedPositionId);
+
+                var count = await employees.CountAsync();
+
+                employees = _service.Sort(employees, (EmployeeService.SortState)sortState);
+                employees = _service.Paging(employees, isFromFilter, (int)page, _pageSize);
+
+                ViewModels.Employee.IndexEmployeeViewModel model = new ViewModels.Employee.IndexEmployeeViewModel
+                {
+                    Employees = await employees.ToListAsync(),
+                    PageViewModel = new ViewModels.PageViewModel(count, (int)page, _pageSize),
+                    FilterEmployeeViewModel = new ViewModels.Employee.FilterEmployeeViewModel(selectedLastName, selectedAge, 
+                        await _context.Positions.ToListAsync(), selectedPositionId),
+                    SortEmployeeViewModel = new ViewModels.Employee.SortEmployeeViewModel((EmployeeService.SortState)sortState),
+                };
+
+                _caching.Set($"employees-{selectedLastName}-{page}-{sortState}-{selectedAge}-{selectedPositionId}", model);
+
+                return View(model);
+            }
         }
 
         // GET: Employees/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.User) && !User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return Redirect("~/Identity/Account/Login");
+            }
+
             if (id == null)
             {
                 return NotFound();
@@ -48,7 +101,11 @@ namespace TouristAgency.Controllers
         // GET: Employees/Create
         public IActionResult Create()
         {
-            ViewData["PositionId"] = new SelectList(_context.Positions, "Id", "Id");
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
+            ViewData["Positions"] = new SelectList(_context.Positions, "Id", "Name");
             return View();
         }
 
@@ -59,19 +116,28 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,LastName,FirstName,MiddleName,BirthDate,PositionId")] Employee employee)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
             if (ModelState.IsValid)
             {
                 _context.Add(employee);
                 await _context.SaveChangesAsync();
+                _caching.Clean();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PositionId"] = new SelectList(_context.Positions, "Id", "Id", employee.PositionId);
+            ViewData["Positions"] = new SelectList(_context.Positions, "Id", "Name", employee.PositionId);
             return View(employee);
         }
 
         // GET: Employees/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -82,7 +148,7 @@ namespace TouristAgency.Controllers
             {
                 return NotFound();
             }
-            ViewData["PositionId"] = new SelectList(_context.Positions, "Id", "Id", employee.PositionId);
+            ViewData["Positions"] = new SelectList(_context.Positions, "Id", "Name", employee.PositionId);
             return View(employee);
         }
 
@@ -93,6 +159,10 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,LastName,FirstName,MiddleName,BirthDate,PositionId")] Employee employee)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
             if (id != employee.Id)
             {
                 return NotFound();
@@ -104,6 +174,7 @@ namespace TouristAgency.Controllers
                 {
                     _context.Update(employee);
                     await _context.SaveChangesAsync();
+                    _caching.Clean();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -125,6 +196,10 @@ namespace TouristAgency.Controllers
         // GET: Employees/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
             if (id == null)
             {
                 return NotFound();
@@ -146,9 +221,14 @@ namespace TouristAgency.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!User.IsInRole(Areas.Identity.Roles.Admin))
+            {
+                return RedirectToAction("Index", "Employees");
+            }
             var employee = await _context.Employees.FindAsync(id);
             _context.Employees.Remove(employee);
             await _context.SaveChangesAsync();
+            _caching.Clean();
             return RedirectToAction(nameof(Index));
         }
 

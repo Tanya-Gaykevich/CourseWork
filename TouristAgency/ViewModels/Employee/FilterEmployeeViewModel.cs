@@ -8,17 +8,20 @@ namespace TouristAgency.ViewModels.Employee
 {
     public class FilterEmployeeViewModel
     {
-        public string SelectedSurname { get; set; }
+        public string SelectedLastName { get; set; }
+        public int? SelectedAge { get; set; }
 
         public SelectList Positions { get; set; }
         public int? SelectedPositionId { get; set; }
 
-        public FilterEmployeeViewModel(string selectedSurname, List<Models.Position> positions, int? selectedPositionId)
+        public FilterEmployeeViewModel(string selectedLastName, int? selectedAge, List<Models.Position> positions, int? selectedPositionId)
         {
+            SelectedLastName = selectedLastName;
+            SelectedAge = selectedAge;
+
             positions.Insert(0, new Models.Position { Id = 0, Name = "All" });
-            SelectedSurname = selectedSurname;
-            SelectedPositionId = selectedPositionId;
             Positions = new SelectList(positions, "Id", "Name", selectedPositionId);
+            SelectedPositionId = selectedPositionId;
         }
     }
 }
